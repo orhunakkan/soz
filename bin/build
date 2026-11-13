@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+
+ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+WHISPER_VERSION=1.9.5
+WHISPER_SRC="$ROOT/third_party/whisper.cpp-$WHISPER_VERSION"
+BUILD="$ROOT/build"
+
+# whisper.cpp is fetched as a pinned release tarball, not committed.
+if [ ! -d "$WHISPER_SRC" ]; then
+    mkdir -p "$ROOT/third_party"
+    curl -fL --retry 3 -sS -o "$WHISPER_SRC.tar.gz" \
+        "https://github.com/ggml-org/whisper.cpp/archive/refs/tags/v$WHISPER_VERSION.tar.gz"
+    tar -xzf "$WHISPER_SRC.tar.gz" -C "$ROOT/third_party"
+fi
+
+# The engine: static libraries with the Vulkan backend, tuned for this
+# machine's CPU (the GPU does the heavy work; the CPU runs voice detection).
+if [ ! -f "$BUILD/whisper/src/libwhisper.a" ]; then
+    cmake -S "$WHISPER_SRC" -B "$BUILD/whisper" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DGGML_VULKAN=ON \
+        -DGGML_NATIVE="${SOZ_NATIVE:-ON}" \
+        -DWHISPER_BUILD_TESTS=OFF \
+        -DWHISPER_BUILD_EXAMPLES=OFF \
+        -DWHISPER_BUILD_SERVER=OFF \
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+    cmake --build "$BUILD/whisper" -j"$(nproc)" --target whisper
+fi
+
+cd "$BUILD"
+qmake6 "$ROOT/soz.pro" WHISPER_SRC="$WHISPER_SRC" WHISPER_BUILD="$BUILD/whisper"
+make -j"$(nproc)"
+
+echo "Built $BUILD/soz"

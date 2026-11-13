@@ -1,0 +1,11 @@
+[Unit]
+Description=soz Turkish dictation
+After=graphical-session.target pipewire.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/soz daemon
+Restart=on-failure
+RestartSec=2
+UMask=0077

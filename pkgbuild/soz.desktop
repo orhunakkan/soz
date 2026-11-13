@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Soz
+Comment=Turn offline Turkish dictation on or off
+Comment[tr]=Çevrimdışı Türkçe dikteyi aç veya kapat
+Exec=soz switch
+Icon=soz
+Terminal=false
+Categories=Utility;Accessibility;
+Keywords=dictation;turkish;türkçe;dikte;speech;voice;whisper;

@@ -1,0 +1,29 @@
+pkgname=soz
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Offline Turkish dictation for Omarchy: Whisper large-v3-turbo on the GPU"
+arch=('x86_64')
+license=('MIT')
+depends=('qt6-base' 'qt6-multimedia' 'vulkan-icd-loader' 'wtype' 'pipewire' 'curl' 'ffmpeg' 'jq')
+makedepends=('gcc' 'make' 'cmake' 'vulkan-headers' 'spirv-headers' 'shaderc')
+source=()
+sha256sums=()
+
+build() {
+  cd "$startdir/.."
+  ./bin/build
+}
+
+package() {
+  cd "$startdir/.."
+  install -Dm755 build/soz "$pkgdir/usr/bin/soz"
+  install -Dm755 share/omarchy/omarchy-dictation-soz "$pkgdir/usr/bin/omarchy-dictation-soz"
+  install -Dm644 share/bar/Soz.qml "$pkgdir/usr/share/soz/bar/Soz.qml"
+  install -Dm644 share/systemd/soz.service "$pkgdir/usr/lib/systemd/user/soz.service"
+  install -Dm644 share/systemd/soz-login.service "$pkgdir/usr/lib/systemd/user/soz-login.service"
+  install -dm755 "$pkgdir/usr/lib/systemd/user/graphical-session.target.wants"
+  ln -s ../soz-login.service "$pkgdir/usr/lib/systemd/user/graphical-session.target.wants/soz-login.service"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 "$startdir/soz.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/soz.svg"
+  install -Dm644 "$startdir/soz.desktop" "$pkgdir/usr/share/applications/soz.desktop"
+}

@@ -1,0 +1,13 @@
+# Turkish dictation starts every session off, with Superwhisper owning the
+# dictation keys, even if it was left on at shutdown.
+[Unit]
+Description=Start each session with soz off
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/soz off --quiet
+
+[Install]
+WantedBy=graphical-session.target
